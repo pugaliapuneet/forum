@@ -23,10 +23,10 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 
 
-// Route::get('/threads', 'ThreadController@index');
-// Route::get('/threads/{thread}', 'ThreadController@show');
-// Route::post('/threads', 'ThreadController@store');
-// Route::get('/threads/create', 'ThreadController@create');
+Route::get('/threads', 'ThreadController@index');
+Route::get('/threads/{channel}/{thread}', 'ThreadController@show');
+Route::post('/threads', 'ThreadController@store');
+Route::get('/threads/create', 'ThreadController@create');
 
-Route::resource('threads', 'ThreadController');
-Route::post('/threads/{thread}/replies', 'RepliesController@store');
+// Route::resource('threads', 'ThreadController');
+Route::post('/threads/{channel}/{thread}/replies', 'RepliesController@store');
