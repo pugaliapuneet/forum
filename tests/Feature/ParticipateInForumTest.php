@@ -10,6 +10,20 @@ use Tests\TestCase;
 class ParticipateInForumTest extends TestCase
 {
     use DatabaseMigrations;
+    
+    /** @test */
+    function a_reply_requires_a_body()  
+    {
+        $this->signIn();
+        
+        $thread = create('App\Thread');
+        $reply = make('App\Reply', ['body' => null]);
+        // dd($thread->path().'/replies', $reply->toArray());
+        $response = $this->post($thread->path().'/replies', $reply->toArray());
+        // dd($response);
+        $response->assertSessionHasErrors('body');
+    }
+
     /** @test */
     function an_authenticated_user_may_participate_in_forum_threads()  
     {
