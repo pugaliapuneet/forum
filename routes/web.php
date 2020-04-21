@@ -33,6 +33,7 @@ Route::get('/threads/{channel}', 'ThreadController@index');
 
 // Route::resource('threads', 'ThreadController');
 Route::post('/threads/{channel}/{thread}/replies', 'RepliesController@store');
+Route::get('/threads/{channel}/{thread}/replies', 'RepliesController@index');
 
 Route::post('replies/{reply}/favorites', 'FavoritesController@store');
 Route::delete('replies/{reply}/favorites', 'FavoritesController@destroy');
