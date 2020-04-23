@@ -7,9 +7,7 @@ use App\Reply;
 use App\User;
 use Illuminate\Http\Request;
 use App\Rules\SpamFree;
-use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\CreatePostRequest;
-use App\Notifications\YouWereMentioned;
 
 class RepliesController extends Controller
 {
@@ -37,20 +35,12 @@ class RepliesController extends Controller
     public function update(Reply $reply)
     {
         $this->authorize('update', $reply);
-        
-        try {
-            $this->validate(request(), [
-                'body' => ['required', new spamFree],
-            ]);
+    
+        $this->validate(request(), [
+            'body' => ['required', new spamFree],
+        ]);
 
-            $reply->update(request(['body']));
-        } catch (\Exception $e) {
-            return response(
-                'Sorry, your reply could not be saved at this time.', 422
-            );
-        }
-
-        
+        $reply->update(request(['body']));
     }
 
     public function destroy(Reply $reply)
