@@ -38,6 +38,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'confirmed' => 'boolean',
     ];
 
     public function getRouteKeyName()
@@ -49,15 +50,22 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Thread')->latest();
     }
-    
+
     public function lastReply()
     {
         return $this->hasOne('App\Reply')->latest();
     }
-    
+
     public function activity()
     {
         return $this->hasMany('App\Activity');
+    }
+
+    public function confirm()
+    {
+        $this->confirmed = true;
+
+        $this->save();
     }
 
     public function visitedThreadCacheKey($thread)
@@ -68,7 +76,7 @@ class User extends Authenticatable
     public function readThread($thread)
     {
         cache()->forever(
-            $this->visitedThreadCacheKey($thread), 
+            $this->visitedThreadCacheKey($thread),
             Carbon::now()
         );
     }
