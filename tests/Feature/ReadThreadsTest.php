@@ -9,8 +9,8 @@ use Tests\TestCase;
 class ReadThreadsTest extends TestCase
 {
     use DatabaseMigrations;
-    
-    public function setUp():void
+
+    public function setUp(): void
     {
         parent::setUp();
         $this->thread = factory('App\Thread')->create();
@@ -22,14 +22,14 @@ class ReadThreadsTest extends TestCase
         $this->get('/threads')
             ->assertSee($this->thread->title);
     }
-    
+
     /** @test */
     public function a_user_can_read_a_single_thread()
     {
         $this->get($this->thread->path())
             ->assertSee($this->thread->title);
     }
-    
+
     /** @test */
     public function a_user_can_read_replies_that_are_associated_with_a_thread()
     {
@@ -39,7 +39,7 @@ class ReadThreadsTest extends TestCase
         $this->get($this->thread->path())
             ->assertSee($reply->body);
     }
-    
+
     /** @test */
     public function a_user_can_filter_threads_according_to_channel()
     {
@@ -52,7 +52,7 @@ class ReadThreadsTest extends TestCase
             ->assertSee($threadInChannel->title)
             ->assertDontSee($threadNotInChannel->title);
     }
-    
+
     /** @test */
     public function a_user_can_filter_threads_by_any_username()
     {
@@ -66,13 +66,13 @@ class ReadThreadsTest extends TestCase
             ->assertSee($threadByJohn->title)
             ->assertDontSee($threadNotByJohn->title);
     }
-    
+
     /** @test */
     public function a_user_can_filter_threads_by_popularity()
     {
         $threadWithTwoReplies = create('App\Thread');
         create('App\Reply', ['thread_id' => $threadWithTwoReplies->id], 2);
-        
+
         $threadWithThreeReplies = create('App\Thread');
         create('App\Reply', ['thread_id' => $threadWithThreeReplies->id], 3);
 
@@ -83,7 +83,7 @@ class ReadThreadsTest extends TestCase
 
         $this->assertEquals([3, 2, 0], array_column($response['data'], 'replies_count'));
     }
-    
+
     /** @test */
     public function a_user_can_filter_threads_by_those_that_are_unanswered()
     {
@@ -101,14 +101,27 @@ class ReadThreadsTest extends TestCase
     public function a_user_can_request_all_replies_for_a_given_thread()
     {
         $this->withoutExceptionHandling();
-        
+
         $thread = create('App\Thread');
         create('App\Reply', ['thread_id' => $thread->id], 2);
         // dd("asd");
-        $response = $this->getJson($thread->path().'/replies')->json();
+        $response = $this->getJson($thread->path() . '/replies')->json();
         // dd($response);
         $this->assertCount(2, $response['data']);
         $this->assertEquals(2, $response['total']);
     }
 
+    /** @test */
+    function we_record_a_new_visit_each_time_the_thread_is_read()
+    {
+        $this->withoutExceptionHandling();
+        
+        $thread = create('App\Thread');
+
+        $this->assertEquals(0, $thread->visits);
+
+        $this->call('GET', $thread->path());
+
+        $this->assertEquals(1, $thread->fresh()->visits);
+    }
 }
