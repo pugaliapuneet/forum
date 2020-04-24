@@ -47,3 +47,5 @@ Route::patch('/replies/{reply}', 'RepliesController@update');
 
 Route::post('/threads/{channel}/{thread}/subscriptions', 'ThreadSubscriptionsController@store')->middleware('auth');
 Route::delete('/threads/{channel}/{thread}/subscriptions', 'ThreadSubscriptionsController@destroy')->middleware('auth');
+
+Route::get('api/users', 'Api\UsersController@index');

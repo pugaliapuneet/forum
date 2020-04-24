@@ -33,6 +33,8 @@
         .flex {flex: 1;}
         .mr-1 {margin-right: 1em;}
     </style>
+
+    @yield('header')
 </head>
 <body>
     <div id="app">

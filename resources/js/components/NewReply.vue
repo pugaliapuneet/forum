@@ -21,6 +21,9 @@
 </template>
 
 <script>
+import 'at.js';
+import 'jquery.caret';
+
 export default {
     data() {
         return {
@@ -33,6 +36,22 @@ export default {
             return window.App.signedIn;
         }
     },
+
+    mounted() {
+        $("#body").atwho({
+            at: "@", 
+            delay: 750,
+            callbacks: {
+                remoteFilter: function(query, callback) {
+                    console.log("Called");
+                    $.getJSON("/api/users", {name: query}, function(usernames){
+                        callback(usernames)
+                    })
+                }
+            },
+            // data: 'http://localhost:8887/research/users.php',
+        })
+    }, 
 
     methods: {
         addReply() {

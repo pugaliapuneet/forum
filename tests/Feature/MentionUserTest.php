@@ -35,4 +35,20 @@ class MentionUserTest extends TestCase
         //then user2 should be notified.
         $this->assertCount(1, $jane->notifications);
     }
+
+    /** @test */
+    function it_can_fetch_all_mentioned_users_starting_with_the_given_characters()
+    {
+        create('App\User', ['name' => 'johndoe']);
+        create('App\User', ['name' => 'johndoe2']);
+        create('App\User', ['name' => 'janedoe']);
+        
+        $response = $this->json('GET', '/api/users', ['name' => 'john']);
+
+        $this->assertCount(2, $response->json());
+
+        $response = $this->json('GET', '/api/users', ['name' => 'j']);
+
+        $this->assertCount(3, $response->json());
+    }
 }
