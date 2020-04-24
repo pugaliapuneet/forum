@@ -8,6 +8,7 @@ use App\Channel;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Rules\SpamFree;
+use Illuminate\Support\Facades\Redis;
 
 class ThreadController extends Controller
 {
@@ -24,18 +25,20 @@ class ThreadController extends Controller
     {
         $threads = $this->getThreads($channel, $filters);
 
-        if(request()->wantsJson()) {
+        if (request()->wantsJson()) {
             return $threads;
         }
 
-        return view('thread.index', compact('threads'));
+        $trending = array_map('json_decode', Redis::zrevrange('trending_threads', 0, 4));
+        
+        return view('thread.index', compact('threads', 'trending'));
     }
 
     public function getThreads($channel, $filters)
     {
         $threads = Thread::with('channel')->latest()->filter($filters);
-        
-        if($channel->exists) {
+
+        if ($channel->exists) {
             $threads->where('channel_id', $channel->id);
         }
 
@@ -63,16 +66,16 @@ class ThreadController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'title' => ['required', new spamFree], 
-            'body' => ['required', new spamFree], 
-            'channel_id' => 'required|exists:channels,id', 
+            'title' => ['required', new spamFree],
+            'body' => ['required', new spamFree],
+            'channel_id' => 'required|exists:channels,id',
         ]);
-        
+
         $thread = Thread::create([
             'user_id' => auth()->id(),
-            'channel_id' => request('channel_id'), 
-            'title' => request('title'), 
-            'body' => request('body'), 
+            'channel_id' => request('channel_id'),
+            'title' => request('title'),
+            'body' => request('body'),
         ]);
 
         return redirect($thread->path())
@@ -87,8 +90,13 @@ class ThreadController extends Controller
      */
     public function show($channel, Thread $thread)
     {
-        if(auth()->check())
+        if (auth()->check())
             auth()->user()->readThread($thread);
+
+        Redis::zincrby('trending_threads', 1, json_encode([
+            'title' => $thread->title,
+            'path' => $thread->path(),
+        ]));
 
         return view("thread.show", compact('thread'));
     }
@@ -125,10 +133,10 @@ class ThreadController extends Controller
     public function destroy($channel, Thread $thread)
     {
         $this->authorize('update', $thread);
-        
+
         $thread->delete();
 
-        if(request()->wantsJson()) {
+        if (request()->wantsJson()) {
             return response([], 204);
         }
 
