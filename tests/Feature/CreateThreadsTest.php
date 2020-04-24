@@ -24,7 +24,15 @@ class CreateThreadsTest extends TestCase
             ->assertSee($thread->title)
             ->assertSee($thread->body);
     }
-    
+
+    /** @test */
+    function authenticated_users_must_first_confirm_their_email_address_before_creating_threads()
+    {
+        $this->publishThread()
+            ->assertRedirect('/threads')
+            ->assertSessionHas('flash', 'You must first confirm your email address.');
+    }
+
     /** @test */
     function guests_may_not_create_threads()
     {
@@ -48,7 +56,7 @@ class CreateThreadsTest extends TestCase
         $this->publishThread(['body' => null])
             ->assertSessionHasErrors('body');
     }
-    
+
     /** @test */
     function a_thread_requires_a_valid_channel()
     {
@@ -60,20 +68,19 @@ class CreateThreadsTest extends TestCase
         $this->publishThread(['channel_id' => 999])
             ->assertSessionHasErrors('channel_id');
     }
-    
+
     /** @test */
     function unauthorized_users_may_not_delete_threads()
     {
         // $this->withoutExceptionHandling();
 
         $thread = create('App\Thread');
-        
-        $this->delete($thread->path())->assertRedirect('/login');
-        
-        $this->signIn();
-        
-        $this->delete($thread->path())->assertStatus(403);
 
+        $this->delete($thread->path())->assertRedirect('/login');
+
+        $this->signIn();
+
+        $this->delete($thread->path())->assertStatus(403);
     }
 
     /** @test */
@@ -90,16 +97,16 @@ class CreateThreadsTest extends TestCase
 
         $this->assertDatabaseMissing('threads', ['id' => $thread->id]);
         $this->assertDatabaseMissing('replies', ['id' => $reply->id]);
-        
+
         $this->assertEquals(0, Activity::count());
     }
-    
-    function publishThread($overrides=[])
+
+    function publishThread($overrides = [])
     {
         $this->signIn();
 
         $thread = make('App\Thread', $overrides);
-        
+
         return $this->post('/threads', $thread->toArray());
     }
 }

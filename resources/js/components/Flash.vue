@@ -23,7 +23,7 @@ window.flash = function (message, level = 'success') {
         }, 
         created() {
             if(this.message) {
-                this.flash(this.message);
+                this.flash();
             }
 
             window.events.$on(
@@ -32,8 +32,10 @@ window.flash = function (message, level = 'success') {
         }, 
         methods: {
             flash(data) {
-                this.body = data.message;
-                this.level = data.level;
+                if(data) {
+                    this.body = data.message;
+                    this.level = data.level;
+                }
                 this.show = true;
 
                 this.hide();
