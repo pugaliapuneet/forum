@@ -44,6 +44,7 @@ Route::get('/profiles/{user}/notifications', 'UserNotificationsController@index'
 
 Route::delete('/replies/{reply}', 'RepliesController@destroy');
 Route::patch('/replies/{reply}', 'RepliesController@update');
+Route::post('/replies/{reply}/best', 'BestRepliesController@store')->name('best-replies.store');
 
 Route::post('/threads/{channel}/{thread}/subscriptions', 'ThreadSubscriptionsController@store')->middleware('auth');
 Route::delete('/threads/{channel}/{thread}/subscriptions', 'ThreadSubscriptionsController@destroy')->middleware('auth');
@@ -52,3 +53,4 @@ Route::get('api/users', 'Api\UsersController@index');
 Route::post('api/users/{user}/avatar', 'Api\UserAvatarController@store')->middleware('auth')->name('avatar');
 
 Route::get('register/confirm', 'Auth\RegisterConfirmationController@index')->name('register.confirm');
+
