@@ -77,9 +77,12 @@ class ThreadController extends Controller
             'user_id' => auth()->id(),
             'channel_id' => request('channel_id'),
             'title' => request('title'),
-            'slug' => str_slug(request('title')),
             'body' => request('body'),
         ]);
+
+        if(request()->wantsJson()) {
+            return response($thread, 201);
+        }
 
         return redirect($thread->path())
             ->with('flash', 'Your thread has been published!');
@@ -93,8 +96,9 @@ class ThreadController extends Controller
      */
     public function show($channel, Thread $thread, Trending $trending)
     {
-        if (auth()->check())
+        if (auth()->check()) {
             auth()->user()->readThread($thread);
+        }
 
         $trending->push($thread);
 
