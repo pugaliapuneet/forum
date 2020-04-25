@@ -18,7 +18,7 @@ class Thread extends Model
     {
         parent::boot();
 
-        static::deleting(function($thread) {
+        static::deleting(function ($thread) {
             $thread->replies->each->delete();
         });
     }
@@ -57,7 +57,8 @@ class Thread extends Model
         return $filters->apply($query);
     }
 
-    public function subscribe($userId = null) {
+    public function subscribe($userId = null)
+    {
         $this->subscriptions()->create([
             'user_id' => $userId ?: auth()->id(),
         ]);
@@ -65,13 +66,15 @@ class Thread extends Model
         return $this;
     }
     
-    public function unsubscribe($userId = null) {
+    public function unsubscribe($userId = null)
+    {
         $this->subscriptions()
             ->where('user_id', $userId ?: auth()->id())
             ->delete();
     }
     
-    public function subscriptions() {
+    public function subscriptions()
+    {
         return $this->hasMany(ThreadSubscription::class);
     }
 
@@ -91,5 +94,27 @@ class Thread extends Model
     public function getRouteKeyName()
     {
         return 'slug';
+    }
+    
+    public function setSlugAttribute($value)
+    {
+        if (static::whereSlug($slug = str_slug($value))->exists()) {
+            $slug = $this->incrementSlug($slug);
+        }
+
+        $this->attributes['slug'] = $slug;
+    }
+
+    protected function incrementSlug($slug)
+    {
+        $max = static::whereTitle($this->title)->latest('id')->value('slug');
+
+        if (is_numeric($max[-1])) {
+            return preg_replace_callback('/(\d+)$/', function ($matches) {
+                return $matches[1]+1;
+            }, $max);
+        }
+
+        return "{$max}-2";
     }
 }
