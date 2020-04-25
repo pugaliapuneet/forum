@@ -13,12 +13,12 @@ class CreateThreadsTest extends TestCase
     use DatabaseMigrations;
 
     /** @test */
-    function an_authenticated_user_can_create_new_forum_threads()
+    public function an_authenticated_user_can_create_new_forum_threads()
     {
         $this->signIn();
 
         $thread = make('App\Thread');
-        $response = $this->post('/threads', $thread->toArray());
+        $response = $this->post(route('threads'), $thread->toArray());
 
         $this->get($response->headers->get('Location'))
             ->assertSee($thread->title)
@@ -26,39 +26,45 @@ class CreateThreadsTest extends TestCase
     }
 
     /** @test */
-    function authenticated_users_must_first_confirm_their_email_address_before_creating_threads()
+    public function new_users_must_first_confirm_their_email_address_before_creating_threads()
     {
-        $this->publishThread()
-            ->assertRedirect('/threads')
+        $user = factory('App\User')->states('unconfirmed')->create();
+
+        $this->signIn($user);
+        
+        $thread = make('App\Thread');
+
+        $this->post(route('threads'), $thread->toArray())
+            ->assertRedirect(route('threads'))
             ->assertSessionHas('flash', 'You must first confirm your email address.');
     }
 
     /** @test */
-    function guests_may_not_create_threads()
+    public function guests_may_not_create_threads()
     {
-        $this->post('/threads')
-            ->assertRedirect('/login');
+        $this->post(route('threads'))
+            ->assertRedirect(route('login'));
 
         $this->get('/threads/create')
-            ->assertRedirect('/login');
+            ->assertRedirect(route('login'));
     }
 
     /** @test */
-    function a_thread_requires_a_title()
+    public function a_thread_requires_a_title()
     {
         $this->publishThread(['title' => null])
             ->assertSessionHasErrors('title');
     }
 
     /** @test */
-    function a_thread_requires_a_body()
+    public function a_thread_requires_a_body()
     {
         $this->publishThread(['body' => null])
             ->assertSessionHasErrors('body');
     }
 
     /** @test */
-    function a_thread_requires_a_valid_channel()
+    public function a_thread_requires_a_valid_channel()
     {
         factory('App\Channel', 2)->create();
 
@@ -70,13 +76,13 @@ class CreateThreadsTest extends TestCase
     }
 
     /** @test */
-    function unauthorized_users_may_not_delete_threads()
+    public function unauthorized_users_may_not_delete_threads()
     {
         // $this->withoutExceptionHandling();
 
         $thread = create('App\Thread');
 
-        $this->delete($thread->path())->assertRedirect('/login');
+        $this->delete($thread->path())->assertRedirect(route('login'));
 
         $this->signIn();
 
@@ -84,7 +90,7 @@ class CreateThreadsTest extends TestCase
     }
 
     /** @test */
-    function authorized_users_can_delete_threads()
+    public function authorized_users_can_delete_threads()
     {
         $this->signIn();
 
@@ -101,12 +107,12 @@ class CreateThreadsTest extends TestCase
         $this->assertEquals(0, Activity::count());
     }
 
-    function publishThread($overrides = [])
+    public function publishThread($overrides = [])
     {
         $this->signIn();
 
         $thread = make('App\Thread', $overrides);
 
-        return $this->post('/threads', $thread->toArray());
+        return $this->post(route('threads'), $thread->toArray());
     }
 }
