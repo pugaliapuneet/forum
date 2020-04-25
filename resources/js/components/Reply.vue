@@ -1,5 +1,5 @@
 <template>
-    <div id="'reply-'+id" class="card">
+    <div id="'reply-'+id" class="card" :class="isBest ? 'border-success' : ''">
         <div class="card-header">
             <div class="level">
                 <h6 class="flex">
@@ -27,9 +27,12 @@
             <div v-else v-html="body"></div>
         </div>
         
-        <div class="card-footer level" v-if="canUpdate">
-            <button class="btn btn-secondary btn-sm mr-1" @click="editing = true">Edit</button>
-            <button class="btn btn-danger btn-sm mr-1" @click="destroy">Delete</button>
+        <div class="card-footer level">
+            <div v-if="authorize('updateReply', reply)">
+                <button class="btn btn-secondary btn-sm mr-1" @click="editing = true">Edit</button>
+                <button class="btn btn-danger btn-sm mr-1" @click="destroy">Delete</button>
+            </div>
+            <button v-show="!isBest" class="btn btn-light btn-sm ml-a" @click="markBestReply">Best Reply?</button>
         </div>
     </div>
 </template>
@@ -47,6 +50,8 @@ export default {
             editing: false, 
             id: this.data.id,
             body: this.data.body,
+            isBest: this.data.isBest,
+            reply: this.data,
         }
     }, 
 
@@ -54,14 +59,13 @@ export default {
         ago() {
             return moment(this.data.created_at).fromNow() + "...";
         }, 
-        signedIn() {
-            return window.App.signedIn;
-        }, 
-
-        canUpdate() {
-            return this.authorize(user => this.data.user_id == user.id)
-        }
     },
+
+    created() {
+        window.events.$on('best-reply-selected', id => {
+            this.isBest = (id === this.id)
+        })
+    }, 
 
     methods: {
         update() {
@@ -80,7 +84,15 @@ export default {
             axios.delete('/replies/' + this.data.id)
 
             this.$emit('deleted', this.data.id);
-        }
+        }, 
+
+        markBestReply() {
+            this.isBest = true;
+
+            axios.post('/replies/'+this.data.id+'/best');
+
+            window.events.$emit('best-reply-selected', this.data.id);
+        },
     }
 }
 </script>
