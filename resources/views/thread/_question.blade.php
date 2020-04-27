@@ -4,32 +4,30 @@
             <span class="flex">
                 <img src="{{$thread->owner->avatar_path}}" width="25" alt="{{$thread->owner->name}}" class="mr-1">
                 <a href="/profiles/{{$thread->owner->name}}">{{$thread->owner->name}}</a> posted 
-                {{$thread->title}}
+                <span v-text="title"></span>
             </span>
         </div> 
     </div>
 
-    <div class="card-body">
-        {{$thread->body}}
-    </div>
+    <div class="card-body" v-text="body"></div>
 
-    @can('update', $thread)
-    <div class="card-footer">
+    <div class="card-footer" v-if="authorize('owns', thread)">
         <button class="btn btn-sm btn-secondary" @click="editing = true">Edit</button>
     </div>
-    @endcan
 </div>
 
 <div class="card" v-else>
     <div class="card-header">
         <div class="level">
-            <input type="text" value="{{$thread->title}}" class="form-control">
+            <input type="text" v-model="form.title" class="form-control">
         </div>
     </div>
 
     <div class="card-body">
         <div class="form-group">
-            <textarea class="form-control" name="" id="" cols="30" rows="10">{{$thread->body}}</textarea>
+            <textarea class="form-control" v-model="form.body" cols="30" rows="10">
+
+            </textarea>
         </div>
     </div>
 
@@ -37,8 +35,8 @@
     <div class="card-footer">
         <div class="level">
             {{-- <button class="btn btn-sm btn-secondary mr-1" @click="editing = true">Edit</button> --}}
-            <button class="btn btn-sm btn-primary mr-1" @click="">Update</button>
-            <button class="btn btn-sm btn-secondary" @click="editing = false">Cancel</button>
+            <button class="btn btn-sm btn-primary mr-1" @click="update">Update</button>
+            <button class="btn btn-sm btn-secondary" @click="resetForm">Cancel</button>
             
             @can('update', $thread)
             <form action="{{$thread->path()}}" method="POST" class="ml-a">
