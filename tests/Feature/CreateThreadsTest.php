@@ -18,10 +18,8 @@ class CreateThreadsTest extends TestCase
     {
         parent::setUp();
 
-        app()->singleton(Recaptcha::class, function() {
-            return \Mockery::mock(Recaptcha::class, function($m) {
-                $m->shouldReceive('passes')->andReturn(true);
-            });
+        $this->mock(Recaptcha::class, function($mock) {
+            $mock->shouldReceive('passes')->andReturn(true);
         });
     }
 
