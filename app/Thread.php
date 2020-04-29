@@ -12,7 +12,7 @@ class Thread extends Model
     use RecordsActivity, Searchable;
 
     protected $guarded = [];
-    protected $with = ['owner'];
+    protected $with = ['owner', 'channel'];
     protected $appends = ['isSubscribedTo'];
     protected $casts = ['locked' => 'boolean'];
 
@@ -116,5 +116,10 @@ class Thread extends Model
     public function markBestReply($reply)
     {
         $this->update(['best_reply_id' => $reply->id]);
+    }
+
+    public function toSearchableArray()
+    {
+        return $this->toArray() + ['path' => $this->path()];
     }
 }
