@@ -30,6 +30,7 @@ Route::patch('/threads/{channel}/{thread}', 'ThreadController@update')->name('th
 Route::delete('/threads/{channel}/{thread}', 'ThreadController@destroy');
 Route::post('/threads', 'ThreadController@store')->middleware('must-be-confirmed');
 Route::get('/threads/create', 'ThreadController@create');
+Route::get('/threads/search', 'SearchController@show');
 Route::get('/threads/{channel}', 'ThreadController@index');
 
 Route::post('/locked-threads/{thread}', 'LockedThreadsController@store')->name('locked-threads.store')->middleware('admin');
