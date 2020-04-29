@@ -11300,14 +11300,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      body: ''
+      body: '',
+      completed: false
     };
   },
   mounted: function mounted() {
@@ -11338,6 +11337,7 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (_ref) {
         var data = _ref.data;
         _this.body = '';
+        _this.completed = true;
         flash('Your reply has been posted.');
 
         _this.$emit('created', data);
@@ -11682,12 +11682,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ['name', 'value'],
+  props: ['name', 'value', 'placeholder', 'shouldClear'],
   mounted: function mounted() {
     var _this = this;
 
     this.$refs.trix.addEventListener('trix-change', function (e) {
       _this.$emit('input', e.target.innerHTML);
+    });
+    this.$watch('shouldClear', function () {
+      _this.$refs.trix.value = "";
     });
   }
 });
@@ -83074,43 +83077,38 @@ var render = function() {
   return _c("div", [
     _vm.signedIn
       ? _c("div", [
-          _c("form", { on: { submit: _vm.addReply } }, [
-            _c("div", { staticClass: "form-group" }, [
-              _c("textarea", {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.body,
-                    expression: "body"
-                  }
-                ],
-                staticClass: "form-control",
+          _c(
+            "div",
+            { staticClass: "form-group" },
+            [
+              _c("wysiwyg", {
+                ref: "trix",
                 attrs: {
                   name: "body",
-                  id: "body",
-                  rows: "5",
                   placeholder: "Have something to say?",
-                  required: ""
+                  shouldClear: _vm.completed
                 },
-                domProps: { value: _vm.body },
-                on: {
-                  input: function($event) {
-                    if ($event.target.composing) {
-                      return
-                    }
-                    _vm.body = $event.target.value
-                  }
+                model: {
+                  value: _vm.body,
+                  callback: function($$v) {
+                    _vm.body = $$v
+                  },
+                  expression: "body"
                 }
               })
-            ]),
-            _vm._v(" "),
-            _c(
-              "button",
-              { staticClass: "btn btn-default", attrs: { type: "submit" } },
-              [_vm._v("Post")]
-            )
-          ])
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-default",
+              attrs: { type: "submit" },
+              on: { click: _vm.addReply }
+            },
+            [_vm._v("Post")]
+          )
         ])
       : _c("p", { staticClass: "text-center" }, [
           _vm._v("Please "),
@@ -83329,35 +83327,22 @@ var render = function() {
         _vm.editing
           ? _c("div", [
               _c("form", { on: { submit: _vm.update } }, [
-                _c("div", { staticClass: "form-group" }, [
-                  _c("textarea", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
+                _c(
+                  "div",
+                  { staticClass: "form-group" },
+                  [
+                    _c("wysiwyg", {
+                      model: {
                         value: _vm.body,
+                        callback: function($$v) {
+                          _vm.body = $$v
+                        },
                         expression: "body"
                       }
-                    ],
-                    staticClass: "form-control",
-                    attrs: {
-                      name: "",
-                      id: "",
-                      cols: "30",
-                      rows: "10",
-                      required: ""
-                    },
-                    domProps: { value: _vm.body },
-                    on: {
-                      input: function($event) {
-                        if ($event.target.composing) {
-                          return
-                        }
-                        _vm.body = $event.target.value
-                      }
-                    }
-                  })
-                ]),
+                    })
+                  ],
+                  1
+                ),
                 _vm._v(" "),
                 _c("button", { staticClass: "btn btn-sm btn-primary" }, [
                   _vm._v("Update")
@@ -83536,7 +83521,10 @@ var render = function() {
         domProps: { value: _vm.value }
       }),
       _vm._v(" "),
-      _c("trix-editor", { ref: "trix", attrs: { input: "trix" } })
+      _c("trix-editor", {
+        ref: "trix",
+        attrs: { input: "trix", placeholder: _vm.placeholder }
+      })
     ],
     1
   )

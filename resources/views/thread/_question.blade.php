@@ -25,7 +25,7 @@
 
     <div class="card-body">
         <div class="form-group">
-            <wysiwyg name="body" v-model="form.body" :value="form.body"></wysiwyg>
+            <wysiwyg name="body" v-model="form.body"></wysiwyg>
             {{-- <textarea class="form-control" v-model="form.body" cols="30" rows="10"></textarea> --}}
         </div>
     </div>
