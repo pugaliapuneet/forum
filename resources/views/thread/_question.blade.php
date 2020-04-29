@@ -9,7 +9,7 @@
         </div> 
     </div>
 
-    <div class="card-body" v-text="body"></div>
+    <div class="card-body" v-html="body"></div>
 
     <div class="card-footer" v-if="authorize('owns', thread)">
         <button class="btn btn-sm btn-secondary" @click="editing = true">Edit</button>
@@ -25,9 +25,8 @@
 
     <div class="card-body">
         <div class="form-group">
-            <textarea class="form-control" v-model="form.body" cols="30" rows="10">
-
-            </textarea>
+            <wysiwyg name="body" v-model="form.body" :value="form.body"></wysiwyg>
+            {{-- <textarea class="form-control" v-model="form.body" cols="30" rows="10"></textarea> --}}
         </div>
     </div>
 
